@@ -1,0 +1,13 @@
+# IDE Project files
+/.idea
+
+# Eclipse Project files
+.buildpath
+.project
+.settings
+
+# VSCode Project files
+*.vscode
+
+# Other files
+.DS_Store

@@ -1,0 +1,95 @@
+{% if cart_total > 0 %}
+    <script type="text/javascript">
+        var payu_lang = {};
+        payu_lang.error_owner = '{{ error_owner }}';
+        payu_lang.error_card_number = '{{ error_card_number }}';
+        payu_lang.error_card_cvv = '{{ error_card_cvv }}';
+        payu_lang.bank_error = '{{ text_bank_error }}';
+    </script>
+    <script src="/default-assets/javascript/jquery/jquery.payform.min.js?v2" type="text/javascript"></script>
+    <script src="/default-assets/javascript/payment/payu/script.js" type="text/javascript"></script>
+    <style>
+        .payu-credit-card-form{
+            border: 1px solid #ccc;
+            border-radius: 2px;
+        }
+
+        .fa-lg{
+            font-size: 1.3333em;
+        }
+        .fa-2x{
+            font-size: 2em;
+        }
+        .fa-3x{
+            font-size: 3em;
+        }
+        .transparent {
+            opacity: 0.3;
+        }
+    </style>
+
+    <form id="payu-cc-form">
+    <div class="payu-credit-card-form col-xs-12 col-md-8 col-md-offset-2">
+        <div class="col-md-12">
+            <h2><i class="fa fa-credit-card" style="font-size: 1em;"></i> {{ caption_confirm }}</h2>
+        </div>
+        <div class="col-md-12 payment payment-form">
+                <div class="col-md-12">
+                    <div class="form-group" id="card-number-field">
+                        <input type="text" name="cc-number" class="form-control" id="cardNumber" placeholder="{{ caption_card_no }}" />
+                    </div>
+                    <div class="form-group" id="owner-field">
+                        <input type="text" name="cc-owner" class="form-control" id="owner" placeholder="{{ caption_card_owner }}" />
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-xs-12 col-md-7 col-lg-7" id="expiration-date">
+                        <div><label>{{ caption_expire_date }}</label></div>
+                        <div class="row">
+                            <div class="col-xs-12 col-md-4">
+                                <select name="cc-month" class="form-control">
+                                    <option value="01">01</option>
+                                    <option value="02">02</option>
+                                    <option value="03">03</option>
+                                    <option value="04">04</option>
+                                    <option value="05">05</option>
+                                    <option value="06">06</option>
+                                    <option value="07">07</option>
+                                    <option value="08">08</option>
+                                    <option value="09">09</option>
+                                    <option value="10">10</option>
+                                    <option value="11">11</option>
+                                    <option value="12">12</option>
+                                </select>
+                            </div>
+                            <div class="col-xs-12 col-md-4">
+                                <select name="cc-year" class="form-control">
+                                    {% set i = 0 %}
+                                    {% for i in curr_date..last_date %}
+                                    <option value="{{ i }}">20{{ i }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-xs-12 col-md-4" id="cvv-field">
+                                <input type="text" name="cc-cvv" class="form-control" id="cvv" placeholder="CVV" value="">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-xs-12 col-md-5 col-lg-5">
+                        <br>
+                        <div class="pull-right">
+                        <i id="visa" class="fa fa-cc-visa fa-3x"></i>
+                        <i id="mastercard" class="fa fa-cc-mastercard fa-3x"></i>
+                        <i id="amex" class="fa fa-cc-amex fa-3x"></i>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <div class="col-xs-12" id="pay-now">
+                        <button type="submit" class="btn btn-lg btn-success" id="confirm-purchase" data-loading-text="{{ text_success_wait }}">{{ cart_total }}<br />{{ button_confirm }} <i class="fa fa-check"></i></button>
+                    </div>
+                </div>
+        </div>
+    </div>
+    </form>
+{% endif %}

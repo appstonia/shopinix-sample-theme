@@ -1,0 +1,57 @@
+{% if cart_total > 0 %}
+    <div class="col-md-6 col-md-offset-3">
+        <div class="row">
+            <div class="col-md-12">
+                <div class="alert alert-info">
+                    <p><i class="fa fa-info-circle"></i> {{ text_oos_info }}</p>
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-12">
+                <form id="frm-gvp-order">
+                    <input type="hidden" value="{{ data_order_id }}" id="hdn-order-id">
+                </form>
+                <form method="post" id="frm-gvp-pay"></form>
+                <button type="button" class="btn btn-success btn-block" id="btn-confirm">
+                    {{ cart_total }}<br/>
+                    {{ button_confirm }} <i class="fa fa-check"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script type="text/javascript">
+        $('#btn-confirm').click(function (e) {
+            var button = $(this);
+            $.ajax({
+                type: 'post',
+                url: '{{ action_get_pay_form }}',
+                cache: false,
+                datatype: 'json',
+                data: {'order_id': $('#hdn-order-id').val()},
+                beforeSend: function () {
+                    button.addClass('disabled');
+                },
+                success: function (response) {
+                    if (response.hasOwnProperty('status')) {
+                        if (response.status === 'success') {
+                            var form = $('#frm-gvp-pay');
+                            form.prop('action', response.action);
+                            form.html(response.data);
+                            form.submit();
+                            return;
+                        }
+                    }
+                    alert('{{ error_pay_form }}');
+                },
+                error: function (error) {
+                    alert('{{ error_pay_form }}')
+                },
+                complete: function (xhr, status) {
+                    button.removeClass('disabled');
+                }
+            })
+        })
+    </script>
+{% endif %}

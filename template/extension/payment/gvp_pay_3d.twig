@@ -1,0 +1,186 @@
+{% if cart_total > 0 %}
+    <script src="/default-assets/javascript/jquery/jquery.payform.min.js?v2" type="text/javascript"></script>
+    <div class="col-md-6 col-md-offset-3">
+        <form method="post" id="frm-gvp-pay">
+            <div class="row">
+                <div class="col-md-12">
+                    <h2><i class="fa fa-credit-card" style="font-size: 1em;"></i> {{ caption_confirm }}</h2>
+                </div>
+            </div>
+            <div class="form-group" id="fld-card-number">
+                <label for="txt-card-number" class="control-label">{{ entry_card_number }}</label>
+                <div class="input-group">
+                    <input type="text" placeholder="{{ entry_card_number }}" class="form-control" id="txt-card-number"
+                           name="card-number">
+                    <span class="input-group-addon"><i class="fa fa-credit-card" id="icon-card-type"></i></span>
+                </div>
+            </div>
+            <div class="form-group" id="fld-card-owner">
+                <label for="txt-card-owner" class="control-label">{{ entry_card_owner }}</label>
+                <input type="text" placeholder="{{ entry_card_owner }}" class="form-control" id="txt-card-owner"
+                       name="card-owner">
+            </div>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="form-group" id="fld-expire-date">
+                        <label for="sel-ed-month" class="control-label">{{ entry_expire_date }}</label>
+                        <div class="row">
+                            <div class="col-md-5">
+                                <select id="sel-ed-month" class="form-control" name="card-expire-date-month">
+                                    {% set i = 0 %}
+                                    {% for i in 1 .. 12 %}
+                                        <option value="{{ i }}">{{ i }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <select id="sel-ed-year" class="form-control" name="card-expire-date-year">
+                                    {% set i = 0 %}
+                                    {% for i in curr_date .. last_date %}
+                                        <option value="{{ i }}">{{ 2000 + i }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="form-group" id="fld-cvv">
+                        <label for="txt-cvv" class="control-label">{{ entry_cvv }}</label>
+                        <input id="txt-cvv" type="text" class="form-control" placeholder="CVV" name="card-cvv">
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-12">
+                    <button type="submit" class="btn btn-success btn-block" id="btn-confirm">
+                        {{ cart_total }}<br/>
+                        {{ button_confirm }} <i class="fa fa-check"></i>
+                    </button>
+                </div>
+            </div>
+        </form>
+        <form method="post" id="frm-gvp-pay-3d"></form>
+    </div>
+
+    <script type="text/javascript">
+
+        var card_number = $('#txt-card-number');
+        var card_owner = $('#txt-card-owner');
+        var cvv = $('#txt-cvv');
+
+        var card_number_field = $('#fld-card-number');
+        var card_owner_field = $('#fld-card-owner');
+        var cvv_field = $('#fld-cvv');
+
+        var card_type_icon = $('#icon-card-type');
+
+        var confirm_button = $('#btn-confirm');
+
+        card_number.payform('formatCardNumber');
+        cvv.payform('formatCardCVC');
+
+        card_number_field.keyup(function (e) {
+            card_number_field.removeClass('has-error');
+
+            if ($.payform.validateCardNumber(card_number.val()) === false) {
+                card_number_field.addClass('has-error');
+            } else {
+                card_number_field.removeClass('has-error');
+                card_number_field.addClass('has-success');
+            }
+
+            switch ($.payform.parseCardType(card_number.val())) {
+                case 'visa' :
+                    card_type_icon.prop('class', 'fa fa-cc-visa');
+                    break;
+                case 'mastercard':
+                    card_type_icon.prop('class', 'fa fa-cc-mastercard');
+                    break;
+                case 'amex':
+                    card_type_icon.prop('class', 'fa fa-cc-amex');
+                    break;
+                case 'dinersclub':
+                    card_type_icon.prop('class', 'fa fa-cc-diners-club');
+                    break;
+                case 'discover':
+                    card_type_icon.prop('class', 'fa fa-cc-discover');
+                    break;
+                case 'jcb':
+                    card_type_icon.prop('class', 'fa fa-cc-jcb');
+                    break;
+                default:
+                    card_type_icon.prop('class', 'fa fa-credit-card');
+            }
+        });
+
+        card_owner_field.keyup(function (e) {
+            card_owner_field.removeClass('has-error');
+        });
+
+        cvv_field.keyup(function (e) {
+            cvv_field.removeClass('has-error');
+        });
+
+        confirm_button.click(function (e) {
+            e.preventDefault();
+
+            var is_card_number_valid = $.payform.validateCardNumber(card_number.val());
+            var is_card_owner_valid = card_owner.val().length > 4;
+            var is_cvv_valid = $.payform.validateCardCVC(cvv.val());
+
+            if (!is_card_number_valid) {
+                card_number_field.addClass('has-error');
+                card_type_icon.prop('class', 'fa fa-credit-card');
+            }
+
+            if (!is_card_owner_valid) {
+                card_owner_field.addClass('has-error');
+            }
+
+            if (!is_cvv_valid) {
+                cvv_field.addClass('has-error');
+            }
+
+            if (is_card_number_valid && is_card_owner_valid && is_cvv_valid) {
+                $.ajax({
+                    type: 'post',
+                    url: '{{ action_get_pay_form }}',
+                    cache: false,
+                    datatype: 'json',
+                    data: {
+                        'card-number': $('#txt-card-number').val(),
+                        'card-expire-date-month': $('#sel-ed-month').val(),
+                        'card-expire-date-year': $('#sel-ed-year').val(),
+                        'card-cvv': $('#txt-cvv').val(),
+                    },
+                    beforeSend: function () {
+                        confirm_button.addClass('disabled');
+                    },
+                    success: function (response) {
+                        if (response.hasOwnProperty('status')) {
+                            if (response.status === 'success') {
+                                var form = $('#frm-gvp-pay-3d');
+                                form.prop('action', response.action);
+                                form.html(response.data);
+                                form.submit();
+                                return;
+                            }
+                        }
+                        alert('{{ error_pay_form }}');
+                    },
+                    error: function (error) {
+                        alert('{{ error_pay_form }}')
+                    },
+                    complete: function (xhr, status) {
+                        confirm_button.removeClass('disabled');
+                    }
+                })
+            }
+        });
+
+    </script>
+{% endif %}
+
+
+
